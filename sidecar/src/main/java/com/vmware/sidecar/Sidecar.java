@@ -29,8 +29,10 @@ import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
+import reactor.util.retry.Retry;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.UUID;
 
 @SpringBootApplication
@@ -62,7 +64,10 @@ public class Sidecar {
 
             return rSocketRequesterBuilder
                 .setupMetadata(id(), MimeTypes.SIDECAR_ID)
-                .rsocketConnector(connector -> connector.acceptor(responder))
+                .rsocketConnector(connector -> connector
+                    .acceptor(responder)
+                    .reconnect(Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(5)))
+                )
                 .websocket(URI.create("http://localhost:8080/rsocket"));
         }
 
