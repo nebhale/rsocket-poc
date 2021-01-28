@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package com.vmware.collector;
+package com.vmware.application;
 
-import com.vmware.common.Memory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Instant;
 
 @Component
-final class FreeMemoryRepository extends ConcurrentHashMap<String, Memory> {
+final class ScheduledLogger {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Scheduled(fixedDelay = 5_000)
+    void log() {
+        logger.info("{}", Instant.now());
+    }
 
 }

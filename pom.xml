@@ -36,6 +36,7 @@
     </properties>
 
     <modules>
+        <module>application</module>
         <module>collector</module>
         <module>common</module>
         <module>sidecar</module>

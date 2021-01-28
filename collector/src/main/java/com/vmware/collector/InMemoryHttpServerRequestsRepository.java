@@ -14,42 +14,32 @@
  * limitations under the License.
  */
 
-package com.vmware.sidecar;
+package com.vmware.collector;
 
-import com.vmware.common.Memory;
-import com.vmware.common.MimeTypes;
+import com.vmware.common.HttpServerRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class FreeMemoryUpdater {
+final class InMemoryHttpServerRequestsRepository extends ConcurrentHashMap<String, HttpServerRequests> implements HttpServerRequestsRepository {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final String id;
-
-    private final RSocketRequester requester;
-
-    public FreeMemoryUpdater(String id, RSocketRequester requester) {
-        this.id = id;
-        this.requester = requester;
-    }
-
     @Scheduled(fixedDelay = 5_000)
-    void send() {
-        logger.info("Sending Free Memory from {}", id);
+    void cleanup() {
+        Instant limit = Instant.now().minus(Duration.ofSeconds(10));
 
-        requester
-            .route("free-memory")
-            .metadata(id, MimeTypes.SIDECAR_ID)
-            .data(new Memory(Runtime.getRuntime().freeMemory(), Instant.now()))
-            .send()
-            .block();
+        for (Entry<String, HttpServerRequests> entry : entrySet()) {
+            if (entry.getValue().getLastUpdate().isBefore(limit)) {
+                logger.warn("Evicting {}", entry.getKey());
+                remove(entry.getKey());
+            }
+        }
     }
-
 }

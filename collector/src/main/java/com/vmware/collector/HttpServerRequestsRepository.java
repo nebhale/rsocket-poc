@@ -16,9 +16,9 @@
 
 package com.vmware.collector;
 
-import org.springframework.messaging.rsocket.RSocketRequester;
+import com.vmware.common.HttpServerRequests;
 
 import java.util.Map;
 
-interface RequesterRepository extends Map<String, RSocketRequester> {
+interface HttpServerRequestsRepository extends Map<String, HttpServerRequests> {
 }

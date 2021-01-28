@@ -16,46 +16,40 @@
 
 package com.vmware.common;
 
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.util.Objects;
 
-public final class Memory {
+public final class LoggerConfiguration {
 
-    private final long size;
+    private final String configuredLevel;
 
-    private final Instant lastUpdate;
-
-    public Memory(long size, Instant lastUpdate) {
-        this.size = size;
-        this.lastUpdate = lastUpdate;
+    @JsonCreator
+    public LoggerConfiguration(String configuredLevel) {
+        this.configuredLevel = configuredLevel;
     }
 
-    public long getSize() {
-        return size;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
+    public String getConfiguredLevel() {
+        return configuredLevel;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Memory that = (Memory) o;
-        return size == that.size && lastUpdate.equals(that.lastUpdate);
+        LoggerConfiguration that = (LoggerConfiguration) o;
+        return Objects.equals(configuredLevel, that.configuredLevel);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(size, lastUpdate);
+        return Objects.hash(configuredLevel);
     }
 
     @Override
     public String toString() {
-        return "Memory{" +
-            "size=" + size +
-            ", lastUpdate=" + lastUpdate +
+        return "LoggerConfiguration{" +
+            "configuredLevel=" + configuredLevel +
             '}';
     }
 

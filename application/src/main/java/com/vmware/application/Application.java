@@ -14,31 +14,23 @@
  * limitations under the License.
  */
 
-package com.vmware.collector;
+package com.vmware.application;
 
-import com.vmware.common.MimeTypes;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.rsocket.messaging.RSocketStrategiesCustomizer;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-public class Collector {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Collector.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
     @Configuration
     @EnableScheduling
     static class Config {
-
-        @Bean
-        RSocketStrategiesCustomizer idMetadata() {
-            return s -> s.metadataExtractorRegistry(r -> r.metadataToExtract(MimeTypes.SIDECAR_ID, String.class, "sidecar-id"));
-        }
 
     }
 

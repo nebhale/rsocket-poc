@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package com.vmware.collector;
+@NonNullApi
+package com.vmware.application;
 
-import org.springframework.messaging.rsocket.RSocketRequester;
-
-import java.util.Map;
-
-interface RequesterRepository extends Map<String, RSocketRequester> {
-}
+import org.springframework.lang.NonNullApi;

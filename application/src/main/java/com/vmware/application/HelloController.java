@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package com.vmware.collector;
+package com.vmware.application;
 
-import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.time.Instant;
 
-interface RequesterRepository extends Map<String, RSocketRequester> {
+@RestController
+final class HelloController {
+
+    @PostMapping("/hello")
+    Mono<Message> hello(@RequestBody String name) {
+        return Mono.just(new Message(String.format("Hello %s!", name), Instant.now()));
+    }
+
 }

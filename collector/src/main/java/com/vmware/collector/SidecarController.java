@@ -16,7 +16,7 @@
 
 package com.vmware.collector;
 
-import com.vmware.common.Memory;
+import com.vmware.common.HttpServerRequests;
 import io.rsocket.RSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,37 +32,34 @@ final class SidecarController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final FreeMemoryRepository freeMemoryRepository;
+    private final HttpServerRequestsRepository httpServerRequestsRepository;
 
     private final RequesterRepository requesterRepository;
 
-    SidecarController(FreeMemoryRepository freeMemoryRepository, RequesterRepository requesterRepository) {
-        this.freeMemoryRepository = freeMemoryRepository;
+    SidecarController(HttpServerRequestsRepository httpServerRequestsRepository, RequesterRepository requesterRepository) {
+        this.httpServerRequestsRepository = httpServerRequestsRepository;
         this.requesterRepository = requesterRepository;
     }
 
     @ConnectMapping
-    Mono<Void> connect(@Header("sidecar-id") String id, RSocketRequester requester) {
-        logger.info("New Connection from {}", id);
-
+    void connect(@Header("sidecar-id") String id, RSocketRequester requester) {
         requester.rsocketClient().source()
             .flatMap(RSocket::onClose)
+            .doFirst(() -> {
+                logger.info("Connection Accepted from {}", id);
+                requesterRepository.put(id, requester);
+            })
             .doAfterTerminate(() -> {
-                logger.info("Closed Connection from {}", id);
+                logger.info("Connection Closed from {}", id);
                 requesterRepository.remove(id);
             })
             .subscribe();
-
-        requesterRepository.put(id, requester);
-        return Mono.empty();
     }
 
-    @MessageMapping("free-memory")
-    Mono<Void> freeMemory(@Header("sidecar-id") String id, Memory memory) {
-        logger.info("Accepted Free Memory from {}", id);
-
-        freeMemoryRepository.put(id, memory);
-        return Mono.empty();
+    @MessageMapping("http-server-requests")
+    void HttpServerRequests(@Header("sidecar-id") String id, HttpServerRequests httpServerRequests) {
+        logger.debug("Accepted HTTP Server Requests from {}", id);
+        httpServerRequestsRepository.put(id, httpServerRequests);
     }
 
 }

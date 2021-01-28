@@ -17,8 +17,10 @@
 package com.vmware.collector;
 
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-interface RequesterRepository extends Map<String, RSocketRequester> {
+@Component
+final class InMemoryRequesterRepository extends ConcurrentHashMap<String, RSocketRequester> implements RequesterRepository {
 }

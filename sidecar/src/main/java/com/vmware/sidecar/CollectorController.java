@@ -16,25 +16,35 @@
 
 package com.vmware.sidecar;
 
-import com.vmware.common.Memory;
+import com.vmware.common.LoggerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.time.Instant;
 
 @Controller
 final class CollectorController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @MessageMapping("total-memory")
-    Mono<Memory> totalMemory() {
-        logger.info("Sending Total Memory");
+    private final WebClient webClient;
 
-        return Mono.just(new Memory(Runtime.getRuntime().totalMemory(), Instant.now()));
+    CollectorController(WebClient webClient) {
+        this.webClient = webClient;
+    }
+
+    @MessageMapping("loggers.{name}")
+    Mono<Void> loggers(@DestinationVariable String name, LoggerConfiguration loggerConfiguration) {
+        return webClient
+            .post().uri("/loggers/{name}", name)
+            .bodyValue(loggerConfiguration)
+            .retrieve()
+            .bodyToMono(Void.class)
+            .doFirst(() -> logger.info("Configuring logger {} to {}", name, loggerConfiguration.getConfiguredLevel()))
+            .doAfterTerminate(() -> logger.info("Configured logger {} to {}", name, loggerConfiguration.getConfiguredLevel()));
     }
 
 }
